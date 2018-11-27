@@ -19,17 +19,17 @@ int main(int argc, char** argv){
 
 	//aux = defs.maxUsers/nPipes;
 
-	for(i = 0; i < 8; i++){
+	for(i = 0; i < 8; i++){				//INICIALIZAÇÃO DO ARRAY A ZERO
 		for(j = 0; j < N_PIPES; j++)
 			pipes.arr[i][j] = 0;
 	}
 
-	for(i = 0; i < 8; i++){
+	/*for(i = 0; i < 8; i++){
 					for(j = 0; j < N_PIPES; j++){
 						//if(pipes.arr[i][j] != 0)
 							printf("[%d][%d] -> %d\n",i,j,pipes.arr[i][j]);
 					}
-				}
+				}*/
 
 	/*
 	__Pipe0___Pipe1__
