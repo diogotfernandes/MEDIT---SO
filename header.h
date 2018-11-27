@@ -56,6 +56,7 @@ typedef struct USER{
 	char name[8];
 	int login;
 	int pid;
+	int pipe;
 }USER;
 
 typedef struct {

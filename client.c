@@ -57,9 +57,7 @@ int main(int argc, char **argv[])
 void login (char * name){
 
 	int fd, res,aux;
-	char resp_login[20];
-	const char s[2] = "-";
-   	char *token;
+	char resp_login[4];
 
 	fd = open("MAIN-FIFO", O_WRONLY);
 	res = write(fd, &p, sizeof(p));
@@ -68,29 +66,41 @@ void login (char * name){
 	fd = open(fifo_user, O_RDONLY);
 	aux = read(fd, &resp_login, sizeof(resp_login));
 
-	//printf("entra\n");
+   	//printf("%s\n",resp_login);
+   	/***SPLIT resp_login [v-p] v-> válido?; p->pipe a utilizar***/
+   	int var,i = 0;
+   	int input[2];
 
-	printf("%s\n",resp_login);
+	//char str[] = "1-1";
+	char * token;
+	token = strtok (resp_login,"-");
+	while (token != NULL)
+	{
+	  	sscanf (token, "%d", &var);
+    	input[i++] = var;
 
-	/* get the first token */
-   	token = strtok(resp_login, s);
+    	token = strtok (NULL, "-");
+	}
 
-   	printf("%s\n", s);
+	//printf("VALIDO -> [%d]\n",input[0]);
+	//printf("PIPE[%d]\n",input[1]);
+   	/*************************************************************/
 
-
-	/*if(aux == sizeof(resp_login)){
-		switch(s){
+	if(aux == sizeof(resp_login)){
+		switch(input[0]){
 			case 0:
 				printf("Utilizador não encontrado!\n");
 				break;
 			case 1:
 				//printf("Utilizador encontrado na base de dados!\n");
 				p.user.login = 1;
+				p.user.pipe = input[1];
+				printf("Vou utilizar o PIPE[%d]\n",p.user.pipe);
 				strcpy(p.user.name,name);
 				//p.user.name = name;
 				break;
 		}
-	}*/
+	}
 	close(fd);
 }
 

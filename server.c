@@ -254,7 +254,7 @@ int userValidation(pnoUsers lista, char *user) {
 
 void *usersLoginT(){
 
-	int fd, aux, ans, fd_ans, i, j, temp;
+	int fd, aux, ans, fd_ans, i, j, flag;
 	char fifo_user[20];
 	char str[12];
 
@@ -267,7 +267,10 @@ void *usersLoginT(){
 
 			ans = userValidation(usersList,p.cmd);
 
+			printf("VALIDATION -> [%d]\n",ans );
+
 			//sprintf(Base, "%s %d", Base, Number);
+
 
 			if(ans){
 				for(i = 0; i < 8; i++){
@@ -275,25 +278,29 @@ void *usersLoginT(){
 						if(pipes.arr[i][j] == 0){
 							pipes.arr[i][j] = p.user.pid;
 							sprintf(str, "%d-%d",ans,j);
-							i = j = 1000;
-							//stop = 1;
+							i = j = 1000;	//STOP... SAI DO CICLO;
 							}
 						}
 					}
-			}			
 
-			for(i = 0; i < 8; i++){
+
+					/*for(i = 0; i < 8; i++){
 					for(j = 0; j < N_PIPES; j++){
 						if(pipes.arr[i][j] != 0){
 							printf("USER_%d -> PIPE[%d]\n",pipes.arr[i][j],j);
+
 							}
 						}
-					}
+					}*/
+			}else{
+				flag = 99;
+				sprintf(str, "%d-%d",ans,flag);
+			}
 
-
+			printf("\nSTR->%s\n", str);
 
 			fd_ans = open(fifo_user, O_WRONLY);
-			write(fd_ans, &str, sizeof(ans));
+			write(fd_ans, &str, sizeof(ans));	//CASO
 			close(fd_ans);
 
 		}
