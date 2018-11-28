@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <ncurses.h>
 
 /*---------------DEFINES---------------*/  /* SUBSTITUIDO POR VARIÁVEIS DE AMBIENTE
 #define MEDIT_FIFO_SERVER "fifoServer"

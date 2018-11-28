@@ -1,4 +1,5 @@
 #include "header.h"
+#define CH '*'
 
 PEDIDO p;
 
@@ -47,6 +48,97 @@ int main(int argc, char **argv[])
 
     if(p.user.login == 1)
     	printf("login successful!  [%s]\n",p.user.name );
+
+
+    /*******************NCURSES******************************/
+
+
+    int nrow = 16, ncol = 55, posx = 3 , posy = 1;
+	int ch;
+
+	int i, j, height, width, starty, startx, statsW, statsH, statsY, statsX;
+	height = 17; 	//linhas
+	width = 6;		//colunas
+	starty = startx = 2;
+	//widthNames = 15; //colunas
+	statsH = 5;
+	statsW = 76;
+	statsY = 18;
+	statsX = 2;
+
+	initscr();
+	clear();
+	noecho();
+	cbreak();
+
+	WINDOW *numbers = newwin(height, width, 		starty, startx);
+	WINDOW *names 	= newwin(height, width + 9, 	starty, startx + 6);
+	WINDOW *text 	= newwin(height, width + 50,	starty, startx + 20); //altura, largura, starty, startx;
+	WINDOW *stats 	= newwin(statsH, statsW, statsY, statsX);
+
+	//box(numbers, 0, 0);
+	wborder(numbers, '|', ' ', '-', '-', '+', '+', '+', '-');
+	//box(names,0,0);
+	wborder(names, ' ', '|', '-', '-', '-', '+', '-', '+');
+	//box(text, 0,0);
+	wborder(text, '|', '|', '-', '-', '+', '+', '+', '+');
+	//box(stats,0,0);	
+	wborder(stats, '|', '|', '-', '-', '+', '+', '+', '+');
+
+
+	for(i = 1; i < 16; i++){
+		mvwprintw(numbers, i,1," [%d]", i);
+	}
+	for(i = 1; i < 16; i++){
+		mvwprintw(names,i,1,"-> some guy");
+	}
+
+	mvwprintw(stats,1,2,"STATS");
+	mvwprintw(stats,2,2,"User -> %s", p.user.name);
+	mvwprintw(stats,3,2,"Pipe -> PIPE_%d",p.user.pipe);
+
+	for(i = 1; i < 16; i++){
+		mvwprintw(text,i,3,"gtyh gtyh gtyh gtyh gtyh gtyh gtyh gtyh ");
+	}
+
+
+	wrefresh(names);
+	wrefresh(numbers);
+	wrefresh(text);
+	wrefresh(stats);
+
+	keypad(text, TRUE);
+	wmove(text, posy, posx);
+
+	do{
+		ch = wgetch(text);
+		switch(ch){
+			case KEY_UP:
+				posy = (posy>1)?posy-1:posy;
+				break;
+			case KEY_DOWN:
+				posy = (posy<(nrow-1))?posy+1:posy;
+				break;
+			case KEY_LEFT:
+				posx = (posx>1)?posx-1:posx;
+				break;
+			case KEY_RIGHT:
+				posx = (posx<(ncol-1))?posx+1:posx;
+				break;
+			case 10:
+				mvwprintw(stats,1, 1, "(%d,%d) ", posy, posx);
+				wrefresh(stats);
+				break;
+		}
+		
+		wmove(text, posy, posx);
+
+	}while(1);
+
+	endwin();
+
+    /***********************************************************/
+
 
     shutdownClient();
 
