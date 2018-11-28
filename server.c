@@ -11,6 +11,8 @@ pthread_t thread_users;	//
 
 int main(int argc, char** argv){
 
+	system("clear");
+
 	int i, j;
 	int opt, fflag = 0, hflag = 0, lflag = 0, cflag = 0, tflag = 0;
 	defaultSettings(&defs);
@@ -268,6 +270,8 @@ void *usersLoginT(){
 			ans = userValidation(usersList,p.cmd);
 
 			printf("VALIDATION -> [%d]\n",ans );
+			
+			printf("VALIDATION -> [%s]\n",p.cmd );
 
 			//sprintf(Base, "%s %d", Base, Number);
 

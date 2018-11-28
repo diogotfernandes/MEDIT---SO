@@ -6,8 +6,9 @@ PEDIDO p;
 char fifo_user[20], cmd[80];
 
 
-int main(int argc, char **argv[])
+int main(int argc, char** argv)
 {
+	system("clear");
 
 	int fd,resp_login;
 	
@@ -30,29 +31,52 @@ int main(int argc, char **argv[])
     //Criar FIFO do utilizador para comunicação SERVIDOR->CLIENTE
     mkfifo(fifo_user, 0600);
 
-    do{
-    	printf("\n>>> ");
+    int uflag = 0, opt;
+
+    if(argc != 1){  //user introduzido com [-u user]
+
+    	while((opt = getopt(argc, argv, "u:")) != -1 ){
+
+    		switch(opt){
+    			case 'u':
+    				if(uflag != 0){
+						printf("\n[ERRO]O comando -u só pode ser utilizado 1 vez!\n\n");
+						return 1;
+					}
+						uflag++;
+						//p.cmd = optarg;
+						strcpy(p.cmd,optarg);
+						printf("%s\n",optarg);
+						login(p.cmd);
+						if(p.user.login == 0){
+							shutdownClient();
+							return EXIT_FAILURE;
+						}
+						break;
+				case '?':
+					if (isprint(optopt))
+					{
+						fprintf(stderr, "\n[ERRO] Unknown option \"-%c\"\n\n", optopt);
+					}else{
+						fprintf(stderr, "\n[ERRO] Unknown option character %x\n\n", optopt);
+					}
+					return 1;
+    					
+    		}
+    	}
+    }else{
+
+    	do{
+    	printf("\nUsename >>> ");
     	fgets(p.cmd,80,stdin);
 		p.cmd[strlen(p.cmd)-1] = '\0'; 	//remove o /n 
-
-		//printf("%s\n", p.cmd);
-
 		login(p.cmd);
-
-		//printf("%d\n", p.user.login);
-
-		
-
-    }while(p.user.login == 0);
-
-
+    	}while(p.user.login == 0);
+    }
     if(p.user.login == 1)
     	printf("login successful!  [%s]\n",p.user.name );
 
-
     /*******************NCURSES******************************/
-
-
     int nrow = 16, ncol = 55, posx = 3 , posy = 1;
 	int ch;
 
@@ -71,10 +95,10 @@ int main(int argc, char **argv[])
 	noecho();
 	cbreak();
 
-	WINDOW *numbers = newwin(height, width, 		starty, startx);
-	WINDOW *names 	= newwin(height, width + 9, 	starty, startx + 6);
-	WINDOW *text 	= newwin(height, width + 50,	starty, startx + 20); //altura, largura, starty, startx;
-	WINDOW *stats 	= newwin(statsH, statsW, statsY, statsX);
+	WINDOW *numbers = newwin(height, width, 		starty, startx);		//altura, largura, starty, startx;
+	WINDOW *names 	= newwin(height, width + 9, 	starty, startx + 6);	//altura, largura, starty, startx;
+	WINDOW *text 	= newwin(height, width + 50,	starty, startx + 20); 	//altura, largura, starty, startx;
+	WINDOW *info 	= newwin(statsH, statsW, statsY, statsX);				//altura, largura, starty, startx;
 
 	//box(numbers, 0, 0);
 	wborder(numbers, '|', ' ', '-', '-', '+', '+', '+', '-');
@@ -83,7 +107,7 @@ int main(int argc, char **argv[])
 	//box(text, 0,0);
 	wborder(text, '|', '|', '-', '-', '+', '+', '+', '+');
 	//box(stats,0,0);	
-	wborder(stats, '|', '|', '-', '-', '+', '+', '+', '+');
+	wborder(info, '|', '|', '-', '-', '+', '+', '+', '+');
 
 
 	for(i = 1; i < 16; i++){
@@ -92,23 +116,24 @@ int main(int argc, char **argv[])
 	for(i = 1; i < 16; i++){
 		mvwprintw(names,i,1,"-> some guy");
 	}
-
-	mvwprintw(stats,1,2,"STATS");
-	mvwprintw(stats,2,2,"User -> %s", p.user.name);
-	mvwprintw(stats,3,2,"Pipe -> PIPE_%d",p.user.pipe);
+	mvwprintw(info,3,2,"p.cmd -> %s", optarg);
+	mvwprintw(info,1,2,"User -> %s", p.user.name);
+	mvwprintw(info,2,2,"Pipe -> PIPE_%d",p.user.pipe);
 
 	for(i = 1; i < 16; i++){
-		mvwprintw(text,i,3,"gtyh gtyh gtyh gtyh gtyh gtyh gtyh gtyh ");
+		mvwprintw(text,i,3,"fgtyh gtyh gtyh gtyh gtyh gtyh gtyh gtyh gtyh");
 	}
 
 
 	wrefresh(names);
 	wrefresh(numbers);
 	wrefresh(text);
-	wrefresh(stats);
+	wrefresh(info);
 
 	keypad(text, TRUE);
 	wmove(text, posy, posx);
+
+	int stop = 1;
 
 	do{
 		ch = wgetch(text);
@@ -126,14 +151,17 @@ int main(int argc, char **argv[])
 				posx = (posx<(ncol-1))?posx+1:posx;
 				break;
 			case 10:
-				mvwprintw(stats,1, 1, "(%d,%d) ", posy, posx);
-				wrefresh(stats);
+				mvwprintw(info,1, 1, "(%d,%d) ", posy, posx);
+				wrefresh(info);
+				break;
+			case 103:
+				stop = 0;
 				break;
 		}
 		
 		wmove(text, posy, posx);
 
-	}while(1);
+	}while(stop);
 
 	endwin();
 
@@ -147,6 +175,7 @@ int main(int argc, char **argv[])
 
 
 void login (char * name){
+
 
 	int fd, res,aux;
 	char resp_login[4];
