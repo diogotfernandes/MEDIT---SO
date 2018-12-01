@@ -11,6 +11,8 @@ pthread_t thread_users;	//
 
 int main(int argc, char** argv){
 
+	
+
 	system("clear");
 
 	int i, j;
@@ -56,9 +58,6 @@ int main(int argc, char** argv){
 	//pipes.arr[0][0] = 123;
 	printf("%d\n",pipes.arr[0][0]);
 
-//ewdsreidsh
-	//fewdsafeds
-
 	opterr = 0; //Desactiva Mensagem de erro do getopt()...
 
 	mkfifo(defs.fifoServer,0600);	//CRIA FIFO PRINCIPAL, PARA COMUNICAÇÃO ENTRE CLIENTE->SERVIDOR; SERVER APENAS PARA A PRIMEIRA COMUNICAÇÃO
@@ -76,7 +75,6 @@ int main(int argc, char** argv){
 					}
 					fflag++; 	//A flag passa a 1 quando é utilizado o -f.
 					defs.db = optarg;
-					usersList = lerUsers(defs.db);
 					break;
 				case 'l':
 					if(lflag != 0){
@@ -103,8 +101,7 @@ int main(int argc, char** argv){
 					defs.timeout = atoi(optarg);
 					break;
 				case '?':
-					if (isprint(optopt))
-					{
+					if (isprint(optopt)){
 						fprintf(stderr, "\n[ERRO] Unknown option \"-%c\"\n\n", optopt);
 					}else{
 						fprintf(stderr, "\n[ERRO] Unknown option character %x\n\n", optopt);
@@ -113,9 +110,9 @@ int main(int argc, char** argv){
 			}
 		}
 	}
-	else{ 									//Caso Ñ sejam especificados argumentos
-		usersList = lerUsers(defs.db); 		//; Utiliza o ficheiro por defeito; MEDIT.db
-	}
+	
+		usersList = lerUsers(defs.db); //Vai carregar os nomes na Base de Dados (medit.db ou outra...) para uma lista
+		
 
 
 	char cmd[80];

@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include <ncurses.h>
 
+
+
 /*---------------DEFINES---------------*/  /* SUBSTITUIDO POR VARIÁVEIS DE AMBIENTE
 #define MEDIT_FIFO_SERVER "fifoServer"
 #define MEDIT_MAXLINES 15 //Número máximo de linhas; 15 por omissão

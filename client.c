@@ -1,5 +1,4 @@
 #include "header.h"
-#define CH '*'
 
 PEDIDO p;
 
