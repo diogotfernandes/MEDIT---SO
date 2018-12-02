@@ -45,8 +45,9 @@ int main(int argc, char** argv)
 						uflag++;
 						//p.cmd = optarg;
 						strcpy(p.cmd,optarg);
-						printf("%s\n",optarg);
+						//printf("%s\n",optarg);
 						login(p.cmd);
+						//printf("LOGIN_ARG=[%d]\n",p.user.login);
 						if(p.user.login == 0){
 							shutdownClient();
 							return EXIT_FAILURE;
@@ -70,13 +71,15 @@ int main(int argc, char** argv)
     	fgets(p.cmd,80,stdin);
 		p.cmd[strlen(p.cmd)-1] = '\0'; 	//remove o /n 
 		login(p.cmd);
+		//printf("LOGIN_MAIN=[%d]\n",p.user.login);
     	}while(p.user.login == 0);
     }
+    //printf("LOGIN_MAIN=[%d]\n",p.user.login);
     if(p.user.login == 1)
     	printf("login successful!  [%s]\n",p.user.name );
 
     /*******************NCURSES******************************/
-    int nrow = 16, ncol = 55, posx = 3 , posy = 1;
+    int nrow = 16, ncol = 48, posx = 3 , posy = 1;
 	int ch;
 
 	int i, j, height, width, starty, startx, statsW, statsH, statsY, statsX;
@@ -93,6 +96,7 @@ int main(int argc, char** argv)
 	clear();
 	noecho();
 	cbreak();
+	curs_set(0);
 
 	WINDOW *numbers = newwin(height, width, 		starty, startx);		//altura, largura, starty, startx;
 	WINDOW *names 	= newwin(height, width + 9, 	starty, startx + 6);	//altura, largura, starty, startx;
@@ -110,18 +114,24 @@ int main(int argc, char** argv)
 
 
 	for(i = 1; i < 16; i++){
-		mvwprintw(numbers, i,1," [%d]", i);
+		if(i<=9){
+			mvwprintw(numbers, i,1," [0%d]", i);
+		}
+		if(i>=10){
+			mvwprintw(numbers, i,1," [%d]", i);
+		}
 	}
-	for(i = 1; i < 16; i++){
-		mvwprintw(names,i,1,"-> some guy");
-	}
-	mvwprintw(info,3,2,"p.cmd -> %s", optarg);
+	//for(i = 1; i < 16; i++){
+	//	mvwprintw(names,i,1,"-> some guy");
+	//}
+	//mvwprintw(info,3,2,"p.cmd -> %s", optarg);
 	mvwprintw(info,1,2,"User -> %s", p.user.name);
 	mvwprintw(info,2,2,"Pipe -> PIPE_%d",p.user.pipe);
 
-	for(i = 1; i < 16; i++){
-		mvwprintw(text,i,3,"fgtyh gtyh gtyh gtyh gtyh gtyh gtyh gtyh gtyh");
-	}
+	//for(i = 1; i < 16; i++){
+	//}
+
+	int highlight = 1;
 
 
 	wrefresh(names);
@@ -132,26 +142,74 @@ int main(int argc, char** argv)
 	keypad(text, TRUE);
 	wmove(text, posy, posx);
 
-	int stop = 1;
+	int stop = 1, edit;
 
 	do{
+
+		for(i = 1; i < 16; i++){
+			if(i == highlight)
+				wattron(text, A_REVERSE);
+			mvwprintw(text,i,3,"fgtyh gtyh gtyh gtyh gtyh gtyh gtyh gtyh gtyh");
+			wattroff(text,A_REVERSE);
+		}
+
 		ch = wgetch(text);
 		switch(ch){
 			case KEY_UP:
+				highlight--;
+				if(highlight == 0)
+					highlight = 1;
 				posy = (posy>1)?posy-1:posy;
 				break;
 			case KEY_DOWN:
+				highlight++;
+				if(highlight == 16)
+					highlight = 15;
 				posy = (posy<(nrow-1))?posy+1:posy;
 				break;
-			case KEY_LEFT:
+			case 113:
+					mvwprintw(info,1, 30, "(%d,%d) ", posy, posx);
+					wrefresh(info);
+					break;
+			/*case KEY_LEFT:
 				posx = (posx>1)?posx-1:posx;
 				break;
 			case KEY_RIGHT:
 				posx = (posx<(ncol-1))?posx+1:posx;
-				break;
+				break;*/
 			case 10:
-				mvwprintw(info,1, 1, "(%d,%d) ", posy, posx);
+				mvwprintw(names,posy,1,"-> %s",p.user.name);
+				wrefresh(names);
+				mvwprintw(info,3, 2, "EDIT MODE!");
 				wrefresh(info);
+				edit = 1;
+				curs_set(1);
+
+				do{
+					int chEdit = wgetch(text);
+					switch(chEdit){
+					case KEY_LEFT:
+						posx = (posx>3)?posx-1:posx;
+						break;
+					case KEY_RIGHT:
+						posx = (posx<(ncol-1))?posx+1:posx;
+						break;
+					case 113:
+						mvwprintw(info,1, 30, "(%d,%d) ", posy, posx);
+						wrefresh(info);
+						break;
+					case 10:
+						mvwprintw(info,3, 2, "          ");
+						mvwprintw(names,posy,1,"           ");
+						wrefresh(names);
+						wrefresh(info);
+						curs_set(0);
+						edit = 0;
+						break;
+					}
+					wmove(text, posy, posx);
+				}while(edit);
+
 				break;
 			case 103:
 				stop = 0;
@@ -186,7 +244,7 @@ void login (char * name){
 	fd = open(fifo_user, O_RDONLY);
 	aux = read(fd, &resp_login, sizeof(resp_login));
 
-   	//printf("%s\n",resp_login);
+   	printf("%s\n",resp_login);
    	/***SPLIT resp_login [v-p] v-> válido?; p->pipe a utilizar***/
    	int var,i = 0;
    	int input[2];
@@ -214,6 +272,7 @@ void login (char * name){
 			case 1:
 				//printf("Utilizador encontrado na base de dados!\n");
 				p.user.login = 1;
+				printf("LOGIN_FUNCTION=[%d]\n",p.user.login);
 				p.user.pipe = input[1];
 				printf("Vou utilizar o PIPE[%d]\n",p.user.pipe);
 				strcpy(p.user.name,name);

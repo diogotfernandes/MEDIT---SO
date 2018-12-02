@@ -21,7 +21,7 @@
 
 /*---------------ESTRUTURAS---------------*/
 typedef struct USERS {	//Lista dinâmica para guardar os usernames
-	char username[8]; 	
+	char username[9]; 	
 	struct USERS *next;
 }USERS, *pnoUsers;
 
@@ -56,7 +56,7 @@ void shutdownServer();
 
 /*---------------ESTRUTURAS---------------*/
 typedef struct USER{
-	char name[8];
+	char name[9];
 	int login;
 	int pid;
 	int pipe;
